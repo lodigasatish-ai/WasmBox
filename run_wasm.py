@@ -1,18 +1,14 @@
 import time
 import wasmtime
+from hello_host import Root
 
 engine = wasmtime.Engine()
 store = wasmtime.Store(engine)
 
-component = wasmtime.Component.from_file(engine, "hello.wasm")
-linker = wasmtime.Linker(engine)
-
-instance = linker.instantiate(store, component)
-
-hello = instance.get_func(store, "hello")
+root = Root(store)
 
 start = time.perf_counter()
-result = hello(store)
+result = root.hello(store)
 end = time.perf_counter()
 
 print("Result:", result)
