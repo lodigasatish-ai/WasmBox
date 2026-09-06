@@ -35,7 +35,7 @@ def run_wasm(
     engine = Engine(engine_config)
     store = Store(engine)
     store.set_fuel(fuel_limit)
-
+    initial_fuel = store.get_fuel()
     module = Module.from_file(engine, str(path))
 
     linker = Linker(engine)
@@ -58,7 +58,8 @@ def run_wasm(
     end_time = time.perf_counter()
 
     metrics.execution_time_ms = (end_time - start_time) * 1000
-
+    remaining_fuel = store.get_fuel()
+    metrics.instruction_count = initial_fuel - remaining_fuel
     if memory is not None:
         metrics.memory_used_bytes = memory_size_bytes(memory, store)
         metrics.peak_memory_bytes = max(
