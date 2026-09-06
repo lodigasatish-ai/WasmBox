@@ -1,7 +1,7 @@
 from pathlib import Path
 import time
 
-from wasmtime import Engine, Linker, Module, Store
+from wasmtime import Engine, Linker, Module, Store, Trap
 
 from src.security_policy import SecurityPolicy
 from src.resource_metrics import ResourceMetrics, memory_size_bytes
@@ -35,7 +35,9 @@ def run_wasm(
     engine = Engine(engine_config)
     store = Store(engine)
     store.set_fuel(fuel_limit)
+
     initial_fuel = store.get_fuel()
+
     module = Module.from_file(engine, str(path))
 
     linker = Linker(engine)
@@ -52,14 +54,39 @@ def run_wasm(
 
     start = instance.exports(store).get("_start")
 
-    if start is not None:
-        start(store)
+    try:
+        if start is not None:
+            start(store)
+
+    except Trap:
+        end_time = time.perf_counter()
+
+        metrics.execution_time_ms = (end_time - start_time) * 1000
+
+        remaining_fuel = store.get_fuel()
+        metrics.instruction_count = initial_fuel - remaining_fuel
+
+        if memory is not None:
+            metrics.memory_used_bytes = memory_size_bytes(memory, store)
+            metrics.peak_memory_bytes = max(
+                metrics.peak_memory_bytes,
+                metrics.memory_used_bytes,
+            )
+
+        metrics.status = "limit_exceeded"
+
+        if return_metrics:
+            return metrics
+
+        raise
 
     end_time = time.perf_counter()
 
     metrics.execution_time_ms = (end_time - start_time) * 1000
+
     remaining_fuel = store.get_fuel()
     metrics.instruction_count = initial_fuel - remaining_fuel
+
     if memory is not None:
         metrics.memory_used_bytes = memory_size_bytes(memory, store)
         metrics.peak_memory_bytes = max(

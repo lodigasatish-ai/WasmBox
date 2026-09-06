@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 
 WASM_PAGE_SIZE = 64 * 1024
@@ -13,6 +13,10 @@ class ResourceMetrics:
     peak_memory_bytes: int = 0
     instruction_count: int = 0
     status: str = "unknown"
+
+    def to_dict(self) -> dict:
+        """Convert resource metrics into a backend-friendly dictionary."""
+        return asdict(self)
 
 
 def memory_size_bytes(memory, store) -> int:
