@@ -4,7 +4,7 @@ import time
 from wasmtime import Engine, Linker, Module, Store
 
 from src.security_policy import SecurityPolicy
-from src.resource_metrics import ResourceMetrics
+from src.resource_metrics import ResourceMetrics, memory_size_bytes
 
 
 def run_wasm(
@@ -38,12 +38,17 @@ def run_wasm(
 
     module = Module.from_file(engine, str(path))
 
-    # Deliberately do not provide filesystem or network host imports.
     linker = Linker(engine)
     instance = linker.instantiate(store, module)
 
     metrics = ResourceMetrics()
     start_time = time.perf_counter()
+
+    memory = instance.exports(store).get("memory")
+
+    if memory is not None:
+        metrics.memory_used_bytes = memory_size_bytes(memory, store)
+        metrics.peak_memory_bytes = metrics.memory_used_bytes
 
     start = instance.exports(store).get("_start")
 
@@ -53,6 +58,14 @@ def run_wasm(
     end_time = time.perf_counter()
 
     metrics.execution_time_ms = (end_time - start_time) * 1000
+
+    if memory is not None:
+        metrics.memory_used_bytes = memory_size_bytes(memory, store)
+        metrics.peak_memory_bytes = max(
+            metrics.peak_memory_bytes,
+            metrics.memory_used_bytes,
+        )
+
     metrics.status = "success"
 
     if return_metrics:
