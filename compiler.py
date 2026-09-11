@@ -1,6 +1,7 @@
 import ast
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 
@@ -64,12 +65,17 @@ def compile_python(code: str) -> bytes:
             str(wasm_file),
         ]
 
+        start_time = time.perf_counter()
+
         result = subprocess.run(
             command,
             cwd=temp_path,
             capture_output=True,
             text=True,
         )
+
+        compile_time = time.perf_counter() - start_time
+        print(f"Compilation time: {compile_time * 1000:.2f} ms")
 
         if result.returncode != 0:
             error = result.stderr.strip() or result.stdout.strip()
