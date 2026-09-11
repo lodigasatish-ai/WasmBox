@@ -15,7 +15,7 @@ def validate_python(code: str) -> None:
         raise ValueError("Python code cannot be empty.")
 
     try:
-        ast.parse(code)
+        tree = ast.parse(code)
     except SyntaxError as exc:
         raise ValueError(f"Invalid Python syntax: {exc}") from exc
 
@@ -26,8 +26,6 @@ def validate_python(code: str) -> None:
         "socket",
         "ctypes",
     }
-
-    tree = ast.parse(code)
 
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
