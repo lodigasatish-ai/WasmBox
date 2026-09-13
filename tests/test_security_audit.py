@@ -132,4 +132,23 @@ def test_security_audit_detects_unsafe_wasi_import():
         "unsafe WASI import detected" in failure
         for failure in result.failures
     )
-    
+
+def test_security_audit_detects_multiple_unsafe_imports():
+    class FakeImport:
+        def __init__(self, module):
+            self.module = module
+
+    class FakeModule:
+        imports = [
+            FakeImport("wasi_snapshot_preview1"),
+            FakeImport("wasi_unstable"),
+        ]
+
+    result = audit_wasm_imports(FakeModule())
+
+    assert result.passed is False
+    assert len(result.failures) == 2
+    assert all(
+        "unsafe WASI import detected" in failure
+        for failure in result.failures
+    )
