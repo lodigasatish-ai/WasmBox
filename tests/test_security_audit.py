@@ -103,3 +103,16 @@ def test_security_audit_result_serializes_failures():
     assert data["passed"] is False
     assert data["checks"] == ["security policy validation"]
     assert data["failures"] == ["network access must be disabled"]
+
+def test_audit_sandbox_runtime_passes_with_valid_limits():
+    runtime = SandboxRuntime(
+        fuel_limit=100_000,
+        memory_limit=10 * 1024 * 1024,
+    )
+
+    result = audit_sandbox_runtime(runtime)
+
+    assert result.passed is True
+    assert "fuel limit configured" in result.checks
+    assert "memory limit configured" in result.checks
+    assert result.failures == []

@@ -73,3 +73,27 @@ def audit_sandbox_runtime(runtime: SandboxRuntime) -> SecurityAuditResult:
         checks=checks,
         failures=failures,
     )
+
+def audit_wasm_imports(module) -> SecurityAuditResult:
+    """Audit a WASM module to ensure it does not import unsafe host capabilities."""
+
+    checks = []
+    failures = []
+
+    for import_item in module.imports:
+        module_name = import_item.module
+
+        if module_name in {"wasi_snapshot_preview1", "wasi_unstable"}:
+            failures.append(
+                f"unsafe WASI import detected: {module_name}"
+            )
+        else:
+            checks.append(
+                f"allowed import: {module_name}"
+            )
+
+    return SecurityAuditResult(
+        passed=not failures,
+        checks=checks,
+        failures=failures,
+    )
