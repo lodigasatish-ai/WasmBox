@@ -1,4 +1,10 @@
-from src.security_audit import SecurityAuditResult, audit_security_policy
+from src.security_audit import (
+    SecurityAuditResult,
+    audit_security_policy,
+    audit_sandbox_runtime,
+)
+from src.sandbox_runtime import SandboxRuntime
+
 from src.security_policy import SecurityPolicy
 
 
@@ -56,3 +62,16 @@ def test_security_audit_fails_for_multiple_restricted_capabilities():
     assert result.passed is False
     assert "filesystem access must be disabled" in result.failures
     assert "network access must be disabled" in result.failures
+
+def test_audit_sandbox_runtime_passes_with_valid_limits():
+    runtime = SandboxRuntime(
+        fuel_limit=100_000,
+        memory_limit=10 * 1024 * 1024,
+    )
+
+    result = audit_sandbox_runtime(runtime)
+
+    assert result.passed is True
+    assert "fuel limit configured" in result.checks
+    assert "memory limit configured" in result.checks
+    assert result.failures == []
