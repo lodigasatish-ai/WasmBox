@@ -2,6 +2,7 @@ from src.security_audit import (
     SecurityAuditResult,
     audit_security_policy,
     audit_sandbox_runtime,
+    audit_wasm_imports,
 )
 from src.sandbox_runtime import SandboxRuntime
 
@@ -116,3 +117,19 @@ def test_audit_sandbox_runtime_passes_with_valid_limits():
     assert "fuel limit configured" in result.checks
     assert "memory limit configured" in result.checks
     assert result.failures == []
+
+def test_security_audit_detects_unsafe_wasi_import():
+    class FakeImport:
+        module = "wasi_snapshot_preview1"
+
+    class FakeModule:
+        imports = [FakeImport()]
+
+    result = audit_wasm_imports(FakeModule())
+
+    assert result.passed is False
+    assert any(
+        "unsafe WASI import detected" in failure
+        for failure in result.failures
+    )
+    
