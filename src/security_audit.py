@@ -20,7 +20,6 @@ class SecurityAuditResult:
             "failures": self.failures,
         }
 
-
 def audit_security_policy(policy: SecurityPolicy) -> SecurityAuditResult:
     """Audit the sandbox policy for required security restrictions."""
 

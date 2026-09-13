@@ -21,6 +21,7 @@ def test_security_audit_passes_for_valid_policy():
     assert result.failures == []
 
 
+
 def test_security_audit_fails_for_invalid_policy():
     policy = SecurityPolicy(allow_filesystem=True)
 
@@ -75,3 +76,30 @@ def test_audit_sandbox_runtime_passes_with_valid_limits():
     assert "fuel limit configured" in result.checks
     assert "memory limit configured" in result.checks
     assert result.failures == []
+
+def test_security_audit_result_serializes_to_dict():
+    result = SecurityAuditResult(
+        passed=True,
+        checks=["filesystem access disabled", "network access disabled"],
+        failures=[],
+    )
+
+    data = result.to_dict()
+
+    assert data["passed"] is True
+    assert "filesystem access disabled" in data["checks"]
+    assert "network access disabled" in data["checks"]
+    assert data["failures"] == []
+
+def test_security_audit_result_serializes_failures():
+    result = SecurityAuditResult(
+        passed=False,
+        checks=["security policy validation"],
+        failures=["network access must be disabled"],
+    )
+
+    data = result.to_dict()
+
+    assert data["passed"] is False
+    assert data["checks"] == ["security policy validation"]
+    assert data["failures"] == ["network access must be disabled"]
