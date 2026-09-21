@@ -34,3 +34,18 @@ def test_load_wasm_rejects_missing_file(tmp_path):
 
     with pytest.raises(FileNotFoundError):
         load_wasm(str(missing_file), Engine())
+def test_load_wasm_accepts_uppercase_wasm_extension(tmp_path):
+    wat = """
+    (module
+      (func $_start nop)
+      (export "_start" (func $_start))
+    )
+    """
+
+    wasm_file = tmp_path / "UPPER.WASM"
+    wasm_file.write_bytes(wat2wasm(wat))
+
+    engine = Engine()
+    module = load_wasm(str(wasm_file), engine)
+
+    assert module is not None
