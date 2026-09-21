@@ -34,3 +34,19 @@ def test_run_wasm_rejects_invalid_fuel_limit(tmp_path):
         match="fuel_limit must be greater than zero",
     ):
         run_wasm(str(wasm_file), fuel_limit=0)
+def test_run_wasm_rejects_invalid_memory_limit(tmp_path):
+    wat = """
+    (module
+      (func $_start nop)
+      (export "_start" (func $_start))
+    )
+    """
+
+    wasm_file = tmp_path / "invalid-memory.wasm"
+    wasm_file.write_bytes(wat2wasm(wat))
+
+    with pytest.raises(
+        ValueError,
+        match="memory_limit must be greater than zero",
+    ):
+        run_wasm(str(wasm_file), memory_limit=0)
