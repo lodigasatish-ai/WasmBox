@@ -50,3 +50,8 @@ def test_run_wasm_rejects_invalid_memory_limit(tmp_path):
         match="memory_limit must be greater than zero",
     ):
         run_wasm(str(wasm_file), memory_limit=0)
+def test_run_wasm_rejects_missing_file(tmp_path):
+    missing_file = tmp_path / "missing.wasm"
+
+    with pytest.raises(FileNotFoundError):
+        run_wasm(str(missing_file))
