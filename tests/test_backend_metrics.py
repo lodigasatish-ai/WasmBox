@@ -4,16 +4,17 @@ from pathlib import Path
 from wasmtime import wat2wasm
 
 from src.wasm_runner import run_wasm
+from src.resource_metrics import ResourceMetrics
 
 
 def test_run_wasm_returns_backend_metrics():
     wat = """
     (module
-      (memory (export "memory") 1 2)
-      (func (export "_start")
-        nop
-        nop
-      )
+        (memory (export "memory") 1 2)
+        (func (export "_start")
+            nop
+            nop
+        )
     )
     """
 
@@ -27,6 +28,8 @@ def test_run_wasm_returns_backend_metrics():
             str(wasm_path),
             return_metrics=True,
         )
+
+    assert isinstance(metrics, ResourceMetrics)
 
     result = metrics.to_dict()
 
