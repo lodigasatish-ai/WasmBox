@@ -47,5 +47,9 @@ def test_load_wasm_accepts_uppercase_wasm_extension(tmp_path):
 
     engine = Engine()
     module = load_wasm(str(wasm_file), engine)
+def test_load_wasm_rejects_directory_path(tmp_path):
+    wasm_directory = tmp_path / "module.wasm"
+    wasm_directory.mkdir()
 
-    assert module is not None
+    with pytest.raises(FileNotFoundError):
+        load_wasm(str(wasm_directory), Engine())
