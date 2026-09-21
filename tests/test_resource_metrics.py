@@ -40,3 +40,14 @@ def test_execution_time_is_recorded():
     assert isinstance(metrics, ResourceMetrics)
     assert metrics.execution_time_ms >= 0
     assert metrics.status == "success"
+
+def test_resource_metrics_to_dict_preserves_values():
+    metrics = ResourceMetrics(
+        execution_time_ms=12.5,
+        memory_used_bytes=4096,
+        peak_memory_bytes=8192,
+        instruction_count=250,
+        status="success",
+    )
+
+    
