@@ -5,12 +5,14 @@ from wasmtime import Engine, Linker, Module, Store, Trap
 
 from src.security_policy import SecurityPolicy
 from src.resource_metrics import ResourceMetrics, memory_size_bytes
+from src.sandbox_runtime import DEFAULT_MEMORY_LIMIT
 
 
 def run_wasm(
     wasm_path: str,
     policy: SecurityPolicy | None = None,
     fuel_limit: int = 100_000,
+    memory_limit: int = DEFAULT_MEMORY_LIMIT,
     return_metrics: bool = False,
 ) -> int | ResourceMetrics:
     """Execute a WASM module without granting filesystem or network imports."""
@@ -26,6 +28,9 @@ def run_wasm(
     if fuel_limit <= 0:
         raise ValueError("fuel_limit must be greater than zero")
 
+    if memory_limit <= 0:
+        raise ValueError("memory_limit must be greater than zero")
+
     policy = policy or SecurityPolicy()
     policy.validate()
 
@@ -33,8 +38,10 @@ def run_wasm(
     engine_config.consume_fuel = True
 
     engine = Engine(engine_config)
+
     store = Store(engine)
     store.set_fuel(fuel_limit)
+    store.set_limits(memory_size=memory_limit)
 
     initial_fuel = store.get_fuel()
 
