@@ -31,6 +31,7 @@ def test_run_wasm_returns_backend_metrics():
 
     assert isinstance(metrics, ResourceMetrics)
     assert isinstance(metrics.status, str)
+    assert isinstance(metrics.execution_time_ms, float)
     assert isinstance(metrics.instruction_count, int)
     assert metrics.instruction_count >= 0
 
