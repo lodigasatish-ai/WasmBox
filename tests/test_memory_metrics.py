@@ -10,12 +10,12 @@ from src.wasm_runner import run_wasm
 def test_memory_usage_is_recorded():
     wat = """
     (module
-      (memory (export "memory") 1 2)
-      (func (export "_start")
-        i32.const 1
-        memory.grow
-        drop
-      )
+        (memory (export "memory") 1 2)
+        (func (export "_start")
+            i32.const 1
+            memory.grow
+            drop
+        )
     )
     """
 
@@ -31,5 +31,6 @@ def test_memory_usage_is_recorded():
         )
 
     assert metrics.memory_used_bytes == 2 * WASM_PAGE_SIZE
+    assert isinstance(metrics.memory_used_bytes, int)
     assert metrics.peak_memory_bytes == 2 * WASM_PAGE_SIZE
     assert metrics.status == "success"
