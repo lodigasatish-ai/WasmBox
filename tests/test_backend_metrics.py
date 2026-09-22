@@ -30,6 +30,7 @@ def test_run_wasm_returns_backend_metrics():
         )
 
     assert isinstance(metrics, ResourceMetrics)
+    assert isinstance(metrics.status, str)
 
     result = metrics.to_dict()
 
