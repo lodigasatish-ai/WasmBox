@@ -9,12 +9,12 @@ from src.wasm_runner import run_wasm
 def test_execution_time_is_measured():
     wat = """
     (module
-      (func (export "_start")
-        nop
-        nop
-        nop
-        nop
-      )
+        (func (export "_start")
+            nop
+            nop
+            nop
+            nop
+        )
     )
     """
 
@@ -30,4 +30,5 @@ def test_execution_time_is_measured():
         )
 
     assert metrics.execution_time_ms >= 0
+    assert isinstance(metrics.execution_time_ms, float)
     assert metrics.status == "success"
