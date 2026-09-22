@@ -33,4 +33,5 @@ def test_memory_usage_is_recorded():
     assert metrics.memory_used_bytes == 2 * WASM_PAGE_SIZE
     assert isinstance(metrics.memory_used_bytes, int)
     assert metrics.peak_memory_bytes == 2 * WASM_PAGE_SIZE
+    assert isinstance(metrics.peak_memory_bytes, int)
     assert metrics.status == "success"
